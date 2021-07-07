@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 
 class AuthForm extends StatefulWidget {
+  const AuthForm(this.submit, this.isLoading);
+
+  final bool isLoading;
+  final void Function(
+    String email,
+    String password,
+    String username,
+    bool isLogin,
+    BuildContext ctx,
+  ) submit;
+
   @override
   _AuthFormState createState() => _AuthFormState();
 }
@@ -19,9 +30,13 @@ class _AuthFormState extends State<AuthForm> {
     if (isValid) {
       _formKey.currentState.save();
     }
-    debugPrint(_userEmail);
-    debugPrint(_userUsername);
-    debugPrint(_userPassword);
+    widget.submit(
+      _userEmail.trim(),
+      _userPassword.trim(),
+      _userUsername.trim(),
+      _isLogin,
+      context,
+    );
   }
 
   @override
@@ -88,22 +103,26 @@ class _AuthFormState extends State<AuthForm> {
                   const SizedBox(
                     height: 12,
                   ),
-                  ElevatedButton(
-                    onPressed: _trySubmit,
-                    child: _isLogin
-                        ? const Text('Prijava')
-                        : const Text('Registracija'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _isLogin = !_isLogin;
-                      });
-                    },
-                    child: _isLogin
-                        ? const Text('Novi korisnik? Registrujte se.')
-                        : const Text('Imate račun? Prijavite se.'),
-                  )
+                  if (widget.isLoading) const CircularProgressIndicator(),
+                  if (!widget.isLoading)
+                    ElevatedButton(
+                      onPressed: _trySubmit,
+                      child: _isLogin
+                          ? const Text('Prijava')
+                          : const Text('Registracija'),
+                    ),
+                  if (widget.isLoading) const CircularProgressIndicator(),
+                  if (!widget.isLoading)
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _isLogin = !_isLogin;
+                        });
+                      },
+                      child: _isLogin
+                          ? const Text('Novi korisnik? Registrujte se.')
+                          : const Text('Imate račun? Prijavite se.'),
+                    )
                 ],
               ),
             ),

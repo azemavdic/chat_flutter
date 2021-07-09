@@ -6,26 +6,27 @@ import 'package:flutter/material.dart';
 class Messages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance
-          .collection('chat')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return FutureBuilder<FirebaseUser>(
+      future: FirebaseAuth.instance.currentUser(),
+      builder: (context, futureSnapshot) {
+        if (futureSnapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
-        final List<DocumentSnapshot> documents = snapshot.data.documents;
-        return FutureBuilder(
-          future: FirebaseAuth.instance.currentUser(),
-          builder: (context, snapshot) {
+        return StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('chat')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
             }
+            final List<DocumentSnapshot> documents = snapshot.data.documents;
             return ListView.builder(
               reverse: true,
               itemCount: documents.length,
@@ -34,7 +35,9 @@ class Messages extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   child: MessageBubble(
                     documents[index]['text'].toString(),
-                    documents[index]['userId'] == snapshot.data.uid,
+                    documents[index]['userId'] == futureSnapshot.data.uid,
+                    documents[index]['userName'].toString(),
+                    key: ValueKey(documents[index].documentID),
                   ),
                 );
               },

@@ -1,3 +1,4 @@
+import 'package:chat_app/widgets/chat/image_dialog.dart';
 import 'package:flutter/material.dart';
 
 class MessageBubble extends StatelessWidget {
@@ -74,6 +75,14 @@ class MessageBubble extends StatelessWidget {
           right: isMe ? 120 : null,
           child: CircleAvatar(
             backgroundImage: NetworkImage(imageUrl),
+            child: GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => ImageDialog(imageUrl),
+                );
+              },
+            ),
           ),
         ),
       ],

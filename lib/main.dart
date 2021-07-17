@@ -1,10 +1,13 @@
 import 'package:chat_app/screens/auth_screen.dart';
 import 'package:chat_app/screens/chat_screen.dart';
+import 'package:chat_app/screens/splash_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -35,9 +38,12 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: StreamBuilder<FirebaseUser>(
-        stream: FirebaseAuth.instance.onAuthStateChanged,
-        builder: (BuildContext context, AsyncSnapshot<FirebaseUser> snapshot) {
+      home: StreamBuilder<User>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return SplashScreen();
+          }
           if (snapshot.hasData) {
             return ChatScreen();
           }
